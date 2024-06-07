@@ -122,16 +122,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SAML_CONFIG = {
     'xmlsec_binary': '/usr/local/bin/xmlsec1',  # Ajusta esta ruta si es necesario
-    'entityid': 'http://localhost:8000/saml2/metadata/',
+    'entityid': 'http://127.0.0.1:8000/saml2/metadata/',
     'service': {
         'sp': {
             'name': 'Django SP',
             'endpoints': {
                 'assertion_consumer_service': [
-                    ('http://localhost:8000/saml2/acs/', BINDING_HTTP_POST),
+                    ('http://127.0.0.1:8000/saml2/acs/', BINDING_HTTP_POST),
                 ],
                 'single_logout_service': [
-                    ('http://localhost:8000/saml2/ls/', BINDING_HTTP_REDIRECT),
+                    ('http://127.0.0.1:8000/saml2/ls/', BINDING_HTTP_REDIRECT),
                 ],
             },
             'allow_unsolicited': True,
@@ -157,6 +157,12 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'djangosaml2.backends.Saml2Backend',
 )
+SAML_ATTRIBUTE_MAPPING = {
+    'email': ('email',),
+    'username':('username',),
+}
+
+SAML_CSP_HANDLER=""
 SAML_SESSION_COOKIE_NAME = 'saml_session'
 SAML_SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = True
@@ -164,3 +170,25 @@ LOGIN_URL = '/saml2/login/'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 MIDDLEWARE.append('djangosaml2.middleware.SamlSessionMiddleware')
 LOGIN_REDIRECT_URL="/admin"
+
+# LOGGING
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'djangosaml2': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
