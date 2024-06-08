@@ -1,5 +1,5 @@
 from pathlib import Path
-from saml2 import BINDING_HTTP_POST,BINDING_HTTP_REDIRECT
+from saml2 import BINDING_HTTP_REDIRECT, BINDING_HTTP_POST,xmldsig
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # asi es como lo pone en la documentacion de saml
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "djangosaml2",
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -123,12 +124,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAML_CONFIG = {
     'xmlsec_binary': '/usr/local/bin/xmlsec1',  # Ajusta esta ruta si es necesario
     'entityid': 'http://127.0.0.1:8000/saml2/metadata/',
+
     'service': {
         'sp': {
             'name': 'Django SP',
             'endpoints': {
                 'assertion_consumer_service': [
-                    ('http://127.0.0.1:8000/saml2/acs/', BINDING_HTTP_POST),
+                    ('http://127.0.0.1:8000/saml2/acs/',BINDING_HTTP_POST),
                 ],
                 'single_logout_service': [
                     ('http://127.0.0.1:8000/saml2/ls/', BINDING_HTTP_REDIRECT),
@@ -139,10 +141,29 @@ SAML_CONFIG = {
             'logout_requests_signed': True,
             'want_assertions_signed': True,
             'want_response_signed': False,
+
+            'signing_algorithm': xmldsig.SIG_RSA_SHA256,
+            'digest_algorithm':  xmldsig.DIGEST_SHA256,
+                 # Mandates that the identity provider MUST authenticate the
+            # presenter directly rather than rely on a previous security context.
+            'force_authn': False,
+
+            # Enable AllowCreate in NameIDPolicy.
+            'name_id_format_allow_create': False,
+
+            # attributes that this project need to identify a user
+            'required_attributes': ['email',],
+            #'optional_attributes': ['eduPersonAffiliation'],
         },
     },
     'metadata': {
-        'local': [join(BASE_DIR, 'metadata.xml')],
+        'local': [join(BASE_DIR, 'metadata.xml')], # esto es cuando el metadata esta en el local 
+        #'remote':[
+        #    {
+        #        "url":"https://dev-93915284.okta.com/app/exkhew6c38eQMnQ855d7/sso/saml/metadata",
+        #        "certfile":os.path.join(BASE_DIR,'certs','okta.certs')
+        #    }
+        #]
     },
     'debug': True,
     'key_file': join(BASE_DIR, 'private_key.key'),  # Ajusta esta ruta si es necesario
@@ -159,7 +180,6 @@ AUTHENTICATION_BACKENDS = (
 )
 SAML_ATTRIBUTE_MAPPING = {
     'email': ('email',),
-    'username':('username',),
 }
 
 SAML_CSP_HANDLER=""
@@ -192,3 +212,6 @@ LOGGING = {
         },
     },
 }
+
+#MODIFICACION PARA  USER APP
+AUTH_USER_MODEL='user.User'
