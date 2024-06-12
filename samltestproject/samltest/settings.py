@@ -124,8 +124,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAML_CONFIG = {
     'xmlsec_binary': '/usr/local/bin/xmlsec1',  # Ajusta esta ruta si es necesario
     'entityid': 'http://127.0.0.1:8000/saml2/metadata/',
-
-    'service': {
+    'allow_unknown_attributes': True,
+    'service': {    
         'sp': {
             'name': 'Django SP',
             'endpoints': {
